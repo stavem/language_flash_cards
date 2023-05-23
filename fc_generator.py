@@ -236,7 +236,6 @@ if uploaded_file is not None:
     st.write("""---""")
     st.subheader('Results')
     st.write(final_df)
-    st.write("Saved to filepath: " + filepath)
 
     write_results_to_csv_file(df=final_df, time=CURRENT_TIMESTAMP)
     download_audio_files(filepath, CURRENT_TIMESTAMP)
