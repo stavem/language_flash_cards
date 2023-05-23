@@ -4,6 +4,8 @@ import gtts
 import os
 import pandas as pd
 import streamlit as st
+import zipfile
+
 
 AVAILABLE_LANGUAGES_DICT = googletrans.LANGUAGES
 
@@ -53,12 +55,11 @@ def return_translated_text(raw_text, source, destination='en'):
     return result
 
 
-def read_and_record(raw_word, file_location, spoken_language='pt', localization='com.br'):
+def read_and_record(raw_word, file_location, spoken_language, localization):
     """Read each word out loud and save the mp3 file in the correct location.
     Full localized accents can be found here:
     https://gtts.readthedocs.io/en/latest/module.html#playing-sound-directly"""
 
-    # w = word
     tts = gtts.gTTS(raw_word, lang=spoken_language, tld=localization)
 
     # replace special characters in the provided word.   Use cleaned version as file name
@@ -66,7 +67,11 @@ def read_and_record(raw_word, file_location, spoken_language='pt', localization=
 
     new_filename = cleaned_word + '.mp3'
 
-    tts.save(filepath + '/' + new_filename)
+    path_to_file = file_location + '/' + new_filename
+    tts.save(path_to_file)
+
+    with zipfile.ZipFile(file_location + '/audio_files.zip', 'a') as myzip:
+        myzip.write(path_to_file, os.path.basename(path_to_file))
 
     return new_filename
 
@@ -111,26 +116,46 @@ def iterate_through_uploaded_dataframe(df, path):
 
         # Check if language is available for speech-to-text, if not, don't record audio
         if AVAILABLE_SPEECH_LANGUAGES_DICT.get(learning_lang):
-            file_name = read_and_record(df.loc[index, 'source'], path,
+            file_name = read_and_record(raw_word=df.loc[index, 'source'],
+                                        file_location=path,
                                         spoken_language=learning_lang,
                                         localization=selected_localization)
 
             df.loc[index, 'audio'] = f"[sound:{file_name}]"
 
+            path_to_file = path + '/' + file_name
+
+            with zipfile.ZipFile(path + '/audio_files.zip', 'a') as myzip:
+                myzip.write(path_to_file, os.path.basename(path_to_file))
+
     return df
 
 
-def write_results_to_file(df, time):
+def write_results_to_csv_file(df, time):
     """save the final results to file"""
 
     csv_file = df.to_csv(index=False)
 
     st.download_button(
-        label="Download CSV",
+        label="Download Summary CSV",
         data=csv_file,
-        file_name=f'FlashCards_{time}.csv',
+        file_name=f'FlashCard_Summary_{time}.csv',
         mime='text/csv',
     )
+    return
+
+
+def download_audio_files(path, time):
+    """download a zip file of all audio"""
+
+    with open(path + "/audio_files.zip", "rb") as fp:
+        btn = st.download_button(
+            label="Download Zipped Audio Files",
+            data=fp,
+            file_name=f"Flashcard_Audio_Files_{time}.zip",
+            mime="application/zip"
+        )
+
     return
 
 
@@ -182,7 +207,6 @@ learning_lang = get_language_code(source_language)
 if not AVAILABLE_SPEECH_LANGUAGES_DICT.get(learning_lang):
     st.write(':red[**No text-to-speech available for this language.  No audio files will be created.]')
 
-
 # which accent would you like pronunciation in?
 if learning_lang in ['en', 'fr', 'ca', 'pt', 'es']:
     local_accent = st.selectbox('_Which local dialect?_', sorted(LOCAL_ACCENTS_DICT))
@@ -208,10 +232,12 @@ if uploaded_file is not None:
 
     final_df = iterate_through_uploaded_dataframe(df=raw_df, path=filepath)
 
-    write_results_to_file(df=final_df, time=CURRENT_TIMESTAMP)
-
     # display results to user
     st.write("""---""")
     st.subheader('Results')
     st.write(final_df)
     st.write("Saved to filepath: " + filepath)
+
+    write_results_to_csv_file(df=final_df, time=CURRENT_TIMESTAMP)
+    download_audio_files(filepath, CURRENT_TIMESTAMP)
+
