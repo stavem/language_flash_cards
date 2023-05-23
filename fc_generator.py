@@ -120,15 +120,17 @@ def iterate_through_uploaded_dataframe(df, path):
     return df
 
 
-def write_results_to_file(df, path):
+def write_results_to_file(df, time):
     """save the final results to file"""
-    output_filename = 'FlashCards_' + CURRENT_TIMESTAMP
 
-    final_df.to_csv(path + '/' + output_filename, index=False)
+    csv_file = df.to_csv(index=False)
 
-    with open(path + '/' + output_filename) as f:
-        st.download_button('Download CSV', f)
-
+    st.download_button(
+        label="Download CSV",
+        data=csv_file,
+        file_name=f'FlashCards_{time}.csv',
+        mime='text/csv',
+    )
     return
 
 
@@ -204,9 +206,9 @@ if uploaded_file is not None:
     filepath = create_save_directory(CURRENT_TIMESTAMP)
     raw_df = transform_uploaded_file_to_dataframe(uploaded_file)
 
-    final_df = iterate_through_uploaded_dataframe(raw_df, filepath)
+    final_df = iterate_through_uploaded_dataframe(df=raw_df, path=filepath)
 
-    write_results_to_file(final_df, filepath)
+    write_results_to_file(df=final_df, time=CURRENT_TIMESTAMP)
 
     # display results to user
     st.write("""---""")
