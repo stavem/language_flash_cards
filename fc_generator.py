@@ -82,6 +82,8 @@ def filter_dialect_dictionary(selected_language):
 
 
 def return_translated_text(raw_text, source, destination='en'):
+    """Use the googletrans API to auto translate unknown phrases"""
+
     # create a translator object for text translations
     translator = googletrans.Translator()
 
@@ -113,6 +115,7 @@ def read_and_record(raw_word, file_location, spoken_language, localization):
 
 
 def create_save_directory(filetime):
+    """create a directory to save all files when running in dev mode"""
     file_dir = 'generated_notecard_files/' + filetime
     directory_exists = os.path.exists(file_dir)
 
@@ -123,6 +126,7 @@ def create_save_directory(filetime):
 
 
 def transform_uploaded_file_to_dataframe(f):
+    """Check if uploaded file is .csv or excel and convert to a dataframe"""
     if '.csv' in uploaded_file.name:
         df = pd.read_csv(uploaded_file)
     elif '.xls' in uploaded_file.name:
@@ -137,14 +141,12 @@ def iterate_through_uploaded_dataframe(df, path):
     for index, row in df.iterrows():
 
         if df.loc[index, 'source'] == 'x':
-            # st.write(f'I am translating from {dest_lang} to {source_language}.')
             translation = return_translated_text(df.loc[index, 'destination'],
                                                  source=native_lang,
                                                  destination=learning_lang)
             df.loc[index, 'source'] = str(translation.text)
 
         if df.loc[index, 'destination'] == 'x':
-            # st.write(f'I am translating from {source_language} to {dest_lang}.')
             translation = return_translated_text(df.loc[index, 'source'],
                                                  source=learning_lang,
                                                  destination=native_lang)
