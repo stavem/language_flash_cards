@@ -6,7 +6,6 @@ import pandas as pd
 import streamlit as st
 import zipfile
 
-
 AVAILABLE_LANGUAGES_DICT = googletrans.LANGUAGES
 
 AVAILABLE_LANGUAGES_DISTINCT_SET = set(val for dic in [googletrans.LANGUAGES] for val in googletrans.LANGUAGES.values())
@@ -31,6 +30,27 @@ LOCAL_ACCENTS_DICT = {'No Preference': 'com',
                       }
 
 
+def create_file_template():
+    """Offer a template for the user to download and fill out"""
+
+    d = {'Source': ['oi', 'saudade', 'x'],
+         'Destination': ['Hi', 'x', 'How are you doing today?'],
+         'Tags': ['greetings', 'frequent_words', 'conversational_vocab']}
+
+    df = pd.DataFrame(data=d)
+
+    excel_file = df.to_csv(index=False)
+
+    st.download_button(
+        label="Download File Template To Upload",
+        data=excel_file,
+        file_name=f'File Template.csv',
+        mime='text/csv'
+    )
+
+    return
+
+
 def get_language_code(value, d=AVAILABLE_LANGUAGES_DICT):
     """Find the appropriate two-letter code for Google to properly translate text.
     If multiple options exist, let user decide which is appropriate"""
@@ -43,6 +63,21 @@ def get_language_code(value, d=AVAILABLE_LANGUAGES_DICT):
         selected_dialect = lang_code_list[0]
 
     return selected_dialect
+
+
+def filter_dialect_dictionary(selected_language):
+    """Filter the list of local dialects to only relevant choices for the user"""
+
+    if selected_language == 'en':
+        filtered_dict = {k: v for (k, v) in LOCAL_ACCENTS_DICT.items() if 'English' in k}
+    elif selected_language in ['fr', 'ca']:
+        filtered_dict = {k: v for (k, v) in LOCAL_ACCENTS_DICT.items() if 'French' in k}
+    elif selected_language == 'pt':
+        filtered_dict = {k: v for (k, v) in LOCAL_ACCENTS_DICT.items() if 'Portuguese' in k}
+    elif selected_language == 'es':
+        filtered_dict = {k: v for (k, v) in LOCAL_ACCENTS_DICT.items() if 'Spanish' in k}
+
+    return filtered_dict
 
 
 def return_translated_text(raw_text, source, destination='en'):
@@ -131,7 +166,7 @@ def iterate_through_uploaded_dataframe(df, path):
     return df
 
 
-def write_results_to_csv_file(df, time):
+def download_results_to_csv_file(df, time):
     """save the final results to file"""
 
     csv_file = df.to_csv(index=False)
@@ -179,7 +214,12 @@ __Instructions:__
     * `Source`  (_This is the language you are studying_)
     * `Destination` (_This is the language you already know_)
     * `Tags` (_No spaces allowed, write "common_phrases" not "common phrases"_)  
+    * An example upload template can be found here:
+""")
 
+create_file_template()
+
+st.write("""
 
 
 4. To auto-translate your text, just write "x" in that column and the tool will translate for you.
@@ -208,8 +248,10 @@ if not AVAILABLE_SPEECH_LANGUAGES_DICT.get(learning_lang):
     st.write(':red[**No text-to-speech available for this language.  No audio files will be created.]')
 
 # which accent would you like pronunciation in?
+
 if learning_lang in ['en', 'fr', 'ca', 'pt', 'es']:
-    local_accent = st.selectbox('_Which local dialect?_', sorted(LOCAL_ACCENTS_DICT))
+    dialect_dict = filter_dialect_dictionary(learning_lang)
+    local_accent = st.selectbox('_Which local dialect?_', sorted(dialect_dict))
     st.write('You selected:', local_accent)
     selected_localization = LOCAL_ACCENTS_DICT.get(local_accent)
 else:
@@ -225,11 +267,15 @@ st.write('<br>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader('_Please upload a file_')
 
 if uploaded_file is not None:
+
+    # grab timestamp at point file was uploaded
     CURRENT_TIMESTAMP = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
 
+    # create a save directory in dev mode
     filepath = create_save_directory(CURRENT_TIMESTAMP)
-    raw_df = transform_uploaded_file_to_dataframe(uploaded_file)
 
+    # transform raw data into new, clean dataframe
+    raw_df = transform_uploaded_file_to_dataframe(uploaded_file)
     final_df = iterate_through_uploaded_dataframe(df=raw_df, path=filepath)
 
     # display results to user
@@ -237,6 +283,8 @@ if uploaded_file is not None:
     st.subheader('Results')
     st.write(final_df)
 
-    write_results_to_csv_file(df=final_df, time=CURRENT_TIMESTAMP)
-    download_audio_files(filepath, CURRENT_TIMESTAMP)
+    download_results_to_csv_file(df=final_df, time=CURRENT_TIMESTAMP)
 
+    # don't offer zipped audio files if language unavailable
+    if AVAILABLE_SPEECH_LANGUAGES_DICT.get(learning_lang):
+        download_audio_files(filepath, CURRENT_TIMESTAMP)
