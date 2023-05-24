@@ -30,21 +30,22 @@ LOCAL_ACCENTS_DICT = {'No Preference': 'com',
                       }
 
 
-def create_file_template():
+def create_upload_file_template():
     """Offer a template for the user to download and fill out"""
 
-    d = {'Source': ['oi', 'saudade', 'x'],
-         'Destination': ['Hi', 'x', 'How are you doing today?'],
-         'Tags': ['greetings', 'frequent_words', 'conversational_vocab']}
+    sample_data = {'Source': ['oi', 'saudade', 'x'],
+                   'Destination': ['Hi', 'x', 'How are you doing today?'],
+                   'Tags': ['greetings', 'frequent_words', 'conversational_vocab']
+                   }
 
-    df = pd.DataFrame(data=d)
+    df = pd.DataFrame(data=sample_data)
 
-    excel_file = df.to_csv(index=False)
+    template_file = df.to_csv(index=False)
 
     st.download_button(
-        label="Download File Template To Upload",
-        data=excel_file,
-        file_name=f'File Template.csv',
+        label="Download File Template",
+        data=template_file,
+        file_name=f'File Upload Template.csv',
         mime='text/csv'
     )
 
@@ -198,9 +199,10 @@ def download_audio_files(path, time):
 # DISPLAY DETAILS
 ######################
 
-st.title('Anki Language Notecard Generator')
-st.write('_:grey[A small tool to create language flashcards.]_')
+st.title('Anki Language Flashcard Generator')
 st.write("""
+_:grey[A small study tool to create language flashcards.]_
+
 ---
 __Instructions:__
 
@@ -214,26 +216,29 @@ __Instructions:__
     * `Source`  (_This is the language you are studying_)
     * `Destination` (_This is the language you already know_)
     * `Tags` (_No spaces allowed, write "common_phrases" not "common phrases"_)  
-    * An example upload template can be found here:
+    
+
+4. To auto-translate your text, just write an _x_ in any unknown columns the tool will translate for you.
+    * For example, if you are studying Portuguese and don't know the word for "Hello", write _Hello_ under `Destination` and _x_ under `Source`.
+
+_An example template would look something like this:_
+
+|Source   | Destination  | Tags  |
+|---|---|---|
+|Oi |Hi|greetings   |
+|saudade    |x   |frequent_words    |
+|x  |How are you doing today?   |conversational_vocab   |
 """)
 
-create_file_template()
+create_upload_file_template()
 
 st.write("""
+5. The tool will automatically translate the phrases, record the correct pronunciation, and save an `.mp3` file.  It 
+will also create a single file to bulk create flashcards in Anki. 
 
-
-4. To auto-translate your text, just write "x" in that column and the tool will translate for you.
-    * For example, if you don't know the Spanish word for "Hello", write "Hello" under `Destination` and _x_ under `Source`.
-
-
-5. The tool will automatically translate the phrases, record the correct pronunciation and save an `.mp3` file.  It will also create a single .csv file to import into Anki.
-
-6.  After completing this process:
-    * Bulk import the new audio files into Anki's library.
-    * Bulk import the newly created .csv file to Anki, and Anki will generate a new notecard deck complete with audio files.
-    
+6.  After completing this process: * Bulk import the new audio files into Anki's library. * Bulk import the newly 
+created .csv file to Anki, and Anki will generate a new flashcard deck complete with audio files. 
 ---    
-
 """)
 ########
 
