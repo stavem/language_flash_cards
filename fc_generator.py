@@ -6,6 +6,14 @@ import pandas as pd
 import streamlit as st
 import zipfile
 
+
+st.set_page_config(page_title="Anki Language Flashcard Generator - A small study tool to create language flashcards.",
+                   page_icon=':notebook:')
+
+
+with open('./style.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
 AVAILABLE_LANGUAGES_DICT = googletrans.LANGUAGES
 
 AVAILABLE_LANGUAGES_DISTINCT_SET = set(val for dic in [googletrans.LANGUAGES] for val in googletrans.LANGUAGES.values())
@@ -196,6 +204,15 @@ def download_audio_files(path, time):
 
     return
 
+hide_expander_borders = """
+<style>
+ul.streamlit-expander {
+    border: 0 !important;
+</style>
+"""
+
+st.markdown(hide_expander_borders, unsafe_allow_html=True)
+
 
 ######################
 # DISPLAY DETAILS
@@ -206,8 +223,10 @@ st.write("""
 _:grey[A small study tool to create language flashcards.]_
 
 ---
-__Instructions:__
+""")
+with st.expander("__Instructions:__", expanded=False):
 
+    st.write("""
 1. Select a language to study. (_If multiple dialects of that language exist, select the appropriate localization._)
 
 
@@ -232,9 +251,9 @@ _An example template would look something like this:_
 |x  |How are you doing today?   |conversational_vocab   |
 """)
 
-create_upload_file_template()
+    create_upload_file_template()
 
-st.write("""
+    st.write("""
 5. The tool will automatically translate the phrases, record the correct pronunciation, and save an `.mp3` file.  It 
 will also create a single file to bulk create flashcards in Anki. 
 
