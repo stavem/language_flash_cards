@@ -44,8 +44,8 @@ LOCAL_ACCENTS_DICT = {'No Preference': 'com',
 def create_upload_file_template():
     """Offer a template for the user to download and fill out"""
 
-    sample_data = {'Source': ['oi', 'saudade', 'x'],
-                   'Destination': ['Hi', 'x', 'How are you doing today?'],
+    sample_data = {'Source': ['oi', 'saudade', None],
+                   'Destination': ['Hi', None, 'How are you doing today?'],
                    'Tags': ['greetings', 'frequent_words', 'conversational_vocab']
                    }
 
@@ -244,16 +244,16 @@ with st.expander("__Instructions:__", expanded=False):
     * `Tags` (_No spaces allowed, write "common_phrases" not "common phrases"_)  
     
 
-4. To auto-translate your text, just write an _x_ in any unknown columns the tool will translate for you.
-    * For example, if you are studying Portuguese and don't know the word for "Hello", write _Hello_ under `Destination` and _x_ under `Source`.
+4. To auto-translate your text, just any unknown cells blank and the tool will translate for you.
+    * For example, if you are studying Portuguese and don't know the word for "Hello", write _Hello_ under `Destination` and leave `Source` blank.
 
 _An example template would look something like this:_
 
 |Source   | Destination  | Tags  |
 |---|---|---|
 |Oi |Hi|greetings   |
-|saudade    |x   |frequent_words    |
-|x  |How are you doing today?   |conversational_vocab   |
+|saudade    |   |frequent_words    |
+|  |How are you doing today?   |conversational_vocab   |
 """)
 
     create_upload_file_template()
