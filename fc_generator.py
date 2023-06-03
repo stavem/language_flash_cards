@@ -151,13 +151,13 @@ def iterate_through_uploaded_dataframe(df, path):
     """For each row on the spreadsheet.   Read the text, save the audio file.   Update the dataframe."""
     for index, row in df.iterrows():
 
-        if df.loc[index, 'source'] == 'x':
+        if pd.isnull(df.loc[index, 'source']):
             translation = return_translated_text(df.loc[index, 'destination'],
                                                  source=native_lang,
                                                  destination=learning_lang)
             df.loc[index, 'source'] = str(translation.text)
 
-        if df.loc[index, 'destination'] == 'x':
+        if pd.isnull(df.loc[index, 'destination']):
             translation = return_translated_text(df.loc[index, 'source'],
                                                  source=learning_lang,
                                                  destination=native_lang)
@@ -308,6 +308,8 @@ if uploaded_file is not None:
 
     # transform raw data into new, clean dataframe
     raw_df = transform_uploaded_file_to_dataframe(uploaded_file)
+
+    st.write(raw_df)
     final_df = iterate_through_uploaded_dataframe(df=raw_df, path=filepath)
 
     # display results to user
