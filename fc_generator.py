@@ -264,8 +264,9 @@ will also create a single file to bulk create flashcards in Anki.
 
 6.  After completing this process: * Bulk import the new audio files into Anki's library. * Bulk import the newly 
 created .csv file to Anki, and Anki will generate a new flashcard deck complete with audio files. 
----    
 """)
+
+st.markdown('---')
 ########
 
 st.write('<br>', unsafe_allow_html=True)
