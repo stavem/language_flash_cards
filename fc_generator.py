@@ -1,18 +1,21 @@
+import os
 from datetime import datetime
+
 import googletrans
 import gtts
-import os
 import pandas as pd
 import streamlit as st
 import zipfile
+
+from streamlit_extras.colored_header import colored_header
 
 
 st.set_page_config(page_title="Anki Language Flashcard Generator - A small study tool to create language flashcards.",
                    page_icon=':notebook:')
 
 
-with open('./style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# with open('./style.css') as f:
+#     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 AVAILABLE_LANGUAGES_DICT = googletrans.LANGUAGES
 
@@ -219,11 +222,13 @@ st.markdown(hide_expander_borders, unsafe_allow_html=True)
 ######################
 
 st.title('Anki Language Flashcard Generator')
-st.write("""
-_:grey[A small study tool to create language flashcards.]_
-
----
+st.subheader("""
+_A small study tool to create language flashcards._
 """)
+
+colored_header(label='', description='', color_name='yellow-30')
+
+
 with st.expander("__Instructions:__", expanded=False):
 
     st.write("""
