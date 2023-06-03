@@ -309,6 +309,7 @@ if uploaded_file is not None:
     # transform raw data into new, clean dataframe
     raw_df = transform_uploaded_file_to_dataframe(uploaded_file)
 
+    st.subheader('Uploaded File')
     st.write(raw_df)
     final_df = iterate_through_uploaded_dataframe(df=raw_df, path=filepath)
 
